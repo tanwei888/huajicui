@@ -4,14 +4,87 @@
 
 'use strict';
 
+// 当前语言
+let currentLang = localStorage.getItem('floweryland-lang') || 'zh';
+
 // DOM 就绪
 document.addEventListener('DOMContentLoaded', () => {
+    initLanguage();
     initNavigation();
     initScrollAnimation();
     initCounter();
     initContactForm();
     initPetals();
+    applyTranslation(currentLang);
 });
+
+/* ============================
+   语言切换
+   ============================ */
+function initLanguage() {
+    const langBtns = document.querySelectorAll('.lang-btn');
+
+    // 设置初始状态
+    langBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === currentLang);
+    });
+
+    // 切换事件
+    langBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const lang = btn.dataset.lang;
+            if (lang === currentLang) return;
+
+            currentLang = lang;
+            localStorage.setItem('floweryland-lang', lang);
+
+            // 更新按钮状态
+            langBtns.forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+
+            // 应用翻译
+            applyTranslation(lang);
+
+            // 更新 HTML lang 属性
+            document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+
+            // 更新字体 —— 英文切无衬线，中文切衬线
+            document.documentElement.style.setProperty(
+                '--font-cn',
+                lang === 'zh'
+                    ? "'Noto Serif SC', 'STSong', serif"
+                    : "'Outfit', 'Helvetica Neue', sans-serif"
+            );
+        });
+    });
+}
+
+function applyTranslation(lang) {
+    const dict = translations[lang] || translations['zh'];
+
+    // 翻译 data-i18n 文本元素
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        if (dict[key]) {
+            el.innerHTML = dict[key];
+        }
+    });
+
+    // 翻译 placeholder
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.dataset.i18nPlaceholder;
+        if (dict[key]) {
+            el.placeholder = dict[key];
+        }
+    });
+
+    // 更新页面标题
+    if (dict['site_title']) {
+        document.title = dict['site_title'];
+    }
+
+    // 触发自定义事件，让其他模块知道语言变了
+    document.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang } }));
+}
 
 /* ============================
    导航栏
@@ -22,7 +95,6 @@ function initNavigation() {
     const navLinks = document.querySelectorAll('.nav-link');
 
     // 滚动检测
-    let lastScroll = 0;
     window.addEventListener('scroll', () => {
         const currentScroll = window.scrollY;
 
@@ -31,8 +103,6 @@ function initNavigation() {
         } else {
             header.classList.remove('scrolled');
         }
-
-        lastScroll = currentScroll;
 
         // 高亮当前 section
         updateActiveNav();
@@ -81,7 +151,6 @@ function initScrollAnimation() {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                // 添加延迟，支持 staggered 动画
                 const delay = entry.target.dataset.delay || 0;
                 setTimeout(() => {
                     entry.target.classList.add('visible');
@@ -130,25 +199,22 @@ function initCounter() {
 }
 
 function animateCounter(element, target) {
+    if (target === 0) {
+        element.textContent = '0';
+        return;
+    }
+
     let current = 0;
-    const duration = 2000; // 2s
     const step = Math.max(1, Math.floor(target / 60));
-    const increment = target > 0 ? step : 1;
 
     function update() {
-        current += increment;
+        current += step;
         if (current >= target) {
             element.textContent = target;
             return;
         }
         element.textContent = current;
         requestAnimationFrame(() => setTimeout(update, 30));
-    }
-
-    // 最后一个（有害添加 0%）特殊处理
-    if (target === 0) {
-        element.textContent = '0';
-        return;
     }
 
     update();
@@ -163,7 +229,6 @@ function initPetals() {
 
     const petalEmojis = ['🌸', '🌿', '🌺', '🍃', '✨'];
 
-    // 创建更多花瓣
     for (let i = 0; i < 8; i++) {
         const petal = document.createElement('div');
         petal.textContent = petalEmojis[i % petalEmojis.length];
@@ -192,21 +257,26 @@ function initContactForm() {
         e.preventDefault();
 
         const btn = form.querySelector('.btn-submit');
-        const originalText = btn.textContent;
+        const originalText = btn.innerHTML;
 
-        btn.textContent = '发送中...';
+        const sendingText = currentLang === 'zh' ? '发送中...' : 'Sending...';
+        const sentText = currentLang === 'zh' ? '✓ 已发送' : '✓ Sent';
+
+        btn.innerHTML = sendingText;
         btn.disabled = true;
 
-        // 模拟发送
         setTimeout(() => {
-            btn.textContent = '✓ 已发送';
+            btn.innerHTML = sentText;
             btn.style.background = 'linear-gradient(135deg, #5A7E5E, #7A9D7E)';
 
             setTimeout(() => {
-                btn.textContent = originalText;
+                btn.innerHTML = originalText;
                 btn.disabled = false;
                 btn.style.background = '';
                 form.reset();
+
+                // 重置 placeholder 翻译
+                applyTranslation(currentLang);
             }, 2500);
         }, 1500);
     });
@@ -222,7 +292,7 @@ function initContactForm() {
 }
 
 /* ============================
-   滚动时视差效果 (可选)
+   视差效果
    ============================ */
 window.addEventListener('scroll', () => {
     const hero = document.querySelector('.hero-visual');

@@ -331,6 +331,51 @@ img { max-width: 100%; display: block; }
     transition: var(--transition);
 }
 
+/* 语言切换 */
+.nav {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.lang-switch {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-left: 20px;
+    border-left: 1px solid var(--color-border);
+}
+
+.lang-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-en);
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    color: var(--color-text-lighter);
+    padding: 2px 4px;
+    transition: var(--transition);
+    border-radius: 3px;
+}
+
+.lang-btn:hover {
+    color: var(--color-primary);
+}
+
+.lang-btn.active {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.lang-divider {
+    color: var(--color-border);
+    font-family: var(--font-en);
+    font-size: 0.75rem;
+    font-weight: 300;
+}
+
 /* ============================
    Hero 主视觉
    ============================ */
@@ -943,8 +988,18 @@ textarea.form-input {
     }
 }
 
+@media (max-width: 1024px) {
+    .nav .lang-switch {
+        padding-left: 12px;
+    }
+}
+
 @media (max-width: 768px) {
     .nav-list {
+        display: none;
+    }
+
+    .lang-switch {
         display: none;
     }
 
@@ -961,10 +1016,20 @@ textarea.form-input {
         right: 0;
         background: rgba(250, 248, 245, 0.98);
         backdrop-filter: blur(20px);
-        padding: 30px;
+        padding: 30px 30px 20px;
         gap: 20px;
         text-align: center;
         box-shadow: var(--shadow-md);
+    }
+
+    .header.nav-open .lang-switch {
+        display: flex;
+        position: absolute;
+        top: 100%;
+        right: 30px;
+        margin-top: 15px;
+        padding-left: 0;
+        border-left: none;
     }
 
     .hero-title {
