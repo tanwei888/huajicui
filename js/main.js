@@ -5,7 +5,7 @@
 'use strict';
 
 // 当前语言
-let currentLang = localStorage.getItem('floweryland-lang') || 'zh';
+let currentLang = localStorage.getItem('floweryland-lang') || 'en';
 
 // DOM 就绪
 document.addEventListener('DOMContentLoaded', () => {
