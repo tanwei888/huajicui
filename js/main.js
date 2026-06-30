@@ -221,29 +221,10 @@ function animateCounter(element, target) {
 }
 
 /* ============================
-   花瓣飘落效果
+   花瓣飘落效果（极简版 - 空函数保留兼容）
    ============================ */
 function initPetals() {
-    const container = document.querySelector('.hero-petals');
-    if (!container) return;
-
-    const petalEmojis = ['🌸', '🌿', '🌺', '🍃', '✨'];
-
-    for (let i = 0; i < 8; i++) {
-        const petal = document.createElement('div');
-        petal.textContent = petalEmojis[i % petalEmojis.length];
-        petal.style.cssText = `
-            position: absolute;
-            font-size: ${1 + Math.random() * 1.5}rem;
-            left: ${Math.random() * 100}%;
-            top: -10%;
-            opacity: ${0.3 + Math.random() * 0.4};
-            animation: petalFall ${10 + Math.random() * 15}s linear infinite;
-            animation-delay: ${Math.random() * 10}s;
-            pointer-events: none;
-        `;
-        container.appendChild(petal);
-    }
+    // 极简风格下不启用飘落效果
 }
 
 /* ============================
@@ -292,12 +273,5 @@ function initContactForm() {
 }
 
 /* ============================
-   视差效果
+   视差效果（极简版 - 不启用）
    ============================ */
-window.addEventListener('scroll', () => {
-    const hero = document.querySelector('.hero-visual');
-    if (hero) {
-        const scrolled = window.scrollY;
-        hero.style.transform = `translateY(${scrolled * 0.05}px)`;
-    }
-});
